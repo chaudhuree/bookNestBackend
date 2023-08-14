@@ -91,11 +91,10 @@ exports.bookList = async (req, res) => {
 
               { $skip: skipRow },
               { $limit: perPage },
-             
             ],
           },
         },
-        { $sort: { createdAt: 1 } }
+        { $sort: { createdAt: 1 } },
       ]);
     } else {
       data = await Book.aggregate([
@@ -124,7 +123,7 @@ exports.bookList = async (req, res) => {
             ],
           },
         },
-        { $sort: { createdAt: -1 } }
+        { $sort: { createdAt: -1 } },
       ]);
     }
     // console.log('data', data[0].Rows[0]);
@@ -390,7 +389,7 @@ exports.searchBooksByAuthor = async (req, res) => {
       .populate("author", "name") // Populate the author field with the name only
       .populate("category", "name") // Populate the category field with the name only
       .populate("publication", "name") // Populate the publication field with the name only
-      .select("title author category publication"); // Select specific fields to return
+      .select("title author category publication photo"); // Select specific fields to return
 
     if (books.length === 0) {
       return res
@@ -416,8 +415,7 @@ exports.searchBooksByTitle = async (req, res) => {
     })
       .populate("author") // Populate the author field with the name only
       .populate("category") // Populate the category field with the name only
-      .populate("publication") // Populate the publication field with the name only
-      
+      .populate("publication"); // Populate the publication field with the name only
 
     if (books.length === 0) {
       return res
@@ -430,7 +428,10 @@ exports.searchBooksByTitle = async (req, res) => {
     console.log(error);
     res
       .status(500)
-      .json({ message: "Error occurred while searching for books.",error:error });
+      .json({
+        message: "Error occurred while searching for books.",
+        error: error,
+      });
   }
 };
 
@@ -446,21 +447,26 @@ exports.relatedBooks = async (req, res) => {
       .populate("author")
       .populate("publication")
       .limit(4)
-      .sort({ createdAt: -1 })
-      ;
-
+      .sort({ createdAt: -1 });
     res.json(related);
   } catch (err) {
     console.log(err);
   }
 };
 
-
 exports.filterBooks = async (req, res) => {
   try {
-    const { categories, minPrice, maxPrice, publications, authors,sort,perPage } = req.query;
-    const page=1;
-   
+    const {
+      categories,
+      minPrice,
+      maxPrice,
+      publications,
+      authors,
+      sort,
+      perPage,
+    } = req.query;
+    const page = 1;
+
     // Build your query based on the provided criteria
     let query = {};
 
@@ -469,7 +475,7 @@ exports.filterBooks = async (req, res) => {
       const category = await Category.findOne({ name: categories });
 
       if (category) {
-        query['category'] = category._id;
+        query["category"] = category._id;
       }
     }
 
@@ -487,7 +493,7 @@ exports.filterBooks = async (req, res) => {
       const publication = await Publication.findOne({ name: publications });
 
       if (publication) {
-        query['publication'] = publication._id;
+        query["publication"] = publication._id;
       }
     }
 
@@ -496,7 +502,7 @@ exports.filterBooks = async (req, res) => {
       const author = await Writer.findOne({ name: authors });
 
       if (author) {
-        query['author'] = author._id;
+        query["author"] = author._id;
       }
     }
 
@@ -517,7 +523,7 @@ exports.filterBooks = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage);
 
-    res.json({filteredBooks,total});
+    res.json({ filteredBooks, total });
   } catch (error) {
     console.error(error);
     res.status(500).json({
