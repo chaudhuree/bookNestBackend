@@ -353,8 +353,7 @@ exports.searchBooksByPublication = async (req, res) => {
     const books = await Book.find({ publication: publication._id })
       .populate("author", "name") // Populate the author field with the name only
       .populate("category", "name") // Populate the category field with the name only
-      .populate("publication", "name") // Populate the publication field with the name only
-      .select("title author category publication photo"); // Select specific fields to return
+      .populate("publication", "name"); // Populate the publication field with the name only
 
     if (books.length === 0) {
       return res
@@ -426,12 +425,10 @@ exports.searchBooksByTitle = async (req, res) => {
     res.json(books);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        message: "Error occurred while searching for books.",
-        error: error,
-      });
+    res.status(500).json({
+      message: "Error occurred while searching for books.",
+      error: error,
+    });
   }
 };
 
